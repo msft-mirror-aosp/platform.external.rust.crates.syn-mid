@@ -1,0 +1,19 @@
+name: syn-mid
+description: "Providing the features between 'full' and 'derive' of syn."
+third_party {
+  url {
+    type: HOMEPAGE
+    value: "https://crates.io/crates/syn-mid"
+  }
+  url {
+    type: GIT
+    value: "https://github.com/taiki-e/syn-mid"
+  }
+  version: "0.5.0"
+  license_type: NOTICE
+  last_upgrade_date {
+    year: 2020
+    month: 5
+    day: 6
+  }
+}
