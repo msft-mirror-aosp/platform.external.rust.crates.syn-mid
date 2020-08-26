@@ -1,13 +1,13 @@
-name: syn-mid
-description: "Providing the features between 'full' and 'derive' of syn."
+name: "syn-mid"
+description: "Providing the features between \'full\' and \'derive\' of syn."
 third_party {
   url {
     type: HOMEPAGE
     value: "https://crates.io/crates/syn-mid"
   }
   url {
-    type: GIT
-    value: "https://github.com/taiki-e/syn-mid"
+    type: ARCHIVE
+    value: "https://static.crates.io/crates/syn-mid/syn-mid-0.5.0.crate"
   }
   version: "0.5.0"
   license_type: NOTICE
