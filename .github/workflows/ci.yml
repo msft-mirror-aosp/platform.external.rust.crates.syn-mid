@@ -1,4 +1,4 @@
-name: ci
+name: CI
 
 on:
   pull_request:
@@ -8,33 +8,33 @@ on:
       - staging
       - trying
   schedule:
-    - cron: '00 01 * * *'
+    - cron: '0 1 * * *'
 
 env:
   RUSTFLAGS: -Dwarnings
+  RUST_BACKTRACE: 1
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   test:
     name: test
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         rust:
           # This is the minimum supported Rust version of this crate.
-          # When updating this, the reminder to update the minimum supported
-          # Rust version in README.md.
-          #
-          # Tests are not run as tests may require newer versions of Rust.
+          # When updating this, the reminder to update the minimum supported Rust version in README.md.
           - 1.31.0
           - stable
           - beta
           - nightly
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
       - name: Install Rust
-        shell: bash
-        run: |
-          . ./ci/install-rust.sh ${{ matrix.rust }}
+        run: ci/install-rust.sh ${{ matrix.rust }}
       - name: Install cargo-hack
         if: matrix.rust != '1.31.0'
         run: |
@@ -51,45 +51,84 @@ jobs:
         if: matrix.rust != '1.31.0'
         run: |
           cargo hack check --all --each-feature --no-dev-deps
-      # Refs: https://github.com/rust-lang/cargo/issues/5657
-      - name: cargo check -Zminimal-versions
+      - name: cargo check (minimal versions)
         if: matrix.rust == 'nightly'
         run: |
-          cargo update -Zminimal-versions
-          cargo hack check --all --all-features --no-dev-deps --ignore-private
+          bash scripts/check-minimal-versions.sh
 
-  style:
-    name: style
+  clippy:
+    name: clippy
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        component:
-          - clippy
-          - rustfmt
-          - rustdoc
     steps:
-      - uses: actions/checkout@master
-      - name: Install Rust
-        shell: bash
-        run: |
-          . ./ci/install-rust.sh
-      - name: Install component
-        if: matrix.component != 'rustdoc'
-        shell: bash
-        run: |
-          . ./ci/install-component.sh ${{ matrix.component }}
+      - uses: actions/checkout@v2
+      - name: Install Rust and Clippy
+        run: ci/install-component.sh clippy
       - name: cargo clippy
-        if: matrix.component == 'clippy'
         run: |
-          cargo clippy --all --all-features
-      - name: cargo fmt -- --check
-        if: matrix.component == 'rustfmt'
+          cargo clippy --all --all-features --all-targets
+
+  rustfmt:
+    name: rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust and Rustfmt
+        run: ci/install-component.sh rustfmt
+      - name: cargo fmt --check
         run: |
           cargo fmt --all -- --check
+
+  rustdoc:
+    name: rustdoc
+    env:
+      RUSTDOCFLAGS: -Dwarnings
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust
+        run: ci/install-rust.sh
       - name: cargo doc
-        if: matrix.component == 'rustdoc'
-        env:
-          RUSTDOCFLAGS: -Dwarnings
         run: |
           cargo doc --no-deps --all --all-features
+
+  shellcheck:
+    name: shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: shellcheck
+        run: |
+          shellcheck ci/*.sh scripts/*.sh
+
+  # These jobs don't actually test anything, but they're used to tell bors the
+  # build completed, as there is no practical way to detect when a workflow is
+  # successful listening to webhooks only.
+  #
+  # ALL THE PREVIOUS JOBS NEEDS TO BE ADDED TO THE `needs` SECTION OF THIS JOB!
+
+  ci-success:
+    name: ci
+    if: github.event_name == 'push' && success()
+    needs:
+      - test
+      - clippy
+      - rustfmt
+      - rustdoc
+      - shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark the job as a success
+        run: exit 0
+  ci-failure:
+    name: ci
+    if: github.event_name == 'push' && !success()
+    needs:
+      - test
+      - clippy
+      - rustfmt
+      - rustdoc
+      - shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark the job as a failure
+        run: exit 1
