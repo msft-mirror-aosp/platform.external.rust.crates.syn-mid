@@ -29,6 +29,6 @@ rust_test_host {
 
 // dependent_library ["feature_list"]
 //   proc-macro2-1.0.24
-//   quote-1.0.7
-//   syn-1.0.48 "derive,parsing,printing,quote"
+//   quote-1.0.8
+//   syn-1.0.58 "derive,parsing,printing,quote"
 //   unicode-xid-0.2.1 "default"
