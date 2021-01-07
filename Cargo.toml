@@ -13,10 +13,10 @@
 [package]
 edition = "2018"
 name = "syn-mid"
-version = "0.5.1"
+version = "0.5.3"
 authors = ["Taiki Endo <te316e89@gmail.com>"]
+exclude = ["/.github", "/scripts"]
 description = "Providing the features between \"full\" and \"derive\" of syn.\n"
-homepage = "https://github.com/taiki-e/syn-mid"
 documentation = "https://docs.rs/syn-mid"
 readme = "README.md"
 keywords = ["syn", "macros"]
