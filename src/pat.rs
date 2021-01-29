@@ -8,7 +8,7 @@ ast_enum_of_structs! {
     ///
     /// This type is a [syntax tree enum].
     ///
-    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
+    /// [syntax tree enum]: https://docs.rs/syn/1/syn/enum.Expr.html#syntax-tree-enums
     pub enum Pat {
         /// A pattern that binds a new variable: `ref mut binding @ SUBPATTERN`.
         Ident(PatIdent),
@@ -134,27 +134,28 @@ mod parsing {
         parenthesized,
         parse::{Parse, ParseStream, Result},
         punctuated::Punctuated,
-        token, Ident, Member, Path, Token,
+        token, Attribute, Ident, Member, Path, Token,
     };
-
-    use crate::path;
 
     use super::{
         FieldPat, Pat, PatIdent, PatPath, PatReference, PatStruct, PatTuple, PatTupleStruct,
         PatWild,
     };
+    use crate::path;
 
     impl Parse for Pat {
         fn parse(input: ParseStream<'_>) -> Result<Self> {
             let lookahead = input.lookahead1();
-            if lookahead.peek(Ident)
-                && ({
-                    input.peek2(Token![::])
-                        || input.peek2(token::Brace)
-                        || input.peek2(token::Paren)
-                })
-                || input.peek(Token![self]) && input.peek2(Token![::])
-                || lookahead.peek(Token![::])
+            if {
+                let ahead = input.fork();
+                ahead.parse::<Option<Ident>>()?.is_some()
+                    && (ahead.peek(Token![::])
+                        || ahead.peek(token::Brace)
+                        || ahead.peek(token::Paren))
+            } || {
+                let ahead = input.fork();
+                ahead.parse::<Option<Token![self]>>()?.is_some() && ahead.peek(Token![::])
+            } || lookahead.peek(Token![::])
                 || lookahead.peek(Token![<])
                 || input.peek(Token![Self])
                 || input.peek(Token![super])
@@ -217,7 +218,7 @@ mod parsing {
         while !content.is_empty() && !content.peek(Token![..]) {
             let value = content.call(field_pat)?;
             fields.push_value(value);
-            if !content.peek(Token![,]) {
+            if content.is_empty() {
                 break;
             }
             let punct: Token![,] = content.parse()?;
@@ -234,6 +235,7 @@ mod parsing {
     }
 
     fn field_pat(input: ParseStream<'_>) -> Result<FieldPat> {
+        let attrs = input.call(Attribute::parse_outer)?;
         let boxed: Option<Token![box]> = input.parse()?;
         let by_ref: Option<Token![ref]> = input.parse()?;
         let mutability: Option<Token![mut]> = input.parse()?;
@@ -243,7 +245,7 @@ mod parsing {
             || is_unnamed(&member)
         {
             return Ok(FieldPat {
-                attrs: Vec::new(),
+                attrs,
                 member,
                 colon_token: input.parse()?,
                 pat: input.parse()?,
@@ -258,12 +260,7 @@ mod parsing {
         let pat =
             Pat::Ident(PatIdent { attrs: Vec::new(), by_ref, mutability, ident: ident.clone() });
 
-        Ok(FieldPat {
-            member: Member::Named(ident),
-            pat: Box::new(pat),
-            attrs: Vec::new(),
-            colon_token: None,
-        })
+        Ok(FieldPat { attrs, member: Member::Named(ident), colon_token: None, pat: Box::new(pat) })
     }
 
     fn pat_tuple(input: ParseStream<'_>) -> Result<PatTuple> {

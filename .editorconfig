@@ -1,22 +1,20 @@
 # EditorConfig configuration
 # https://editorconfig.org
 
-# Top-most EditorConfig file
 root = true
 
-# Unix-style newlines with a newline ending every file, utf-8 charset
 [*]
+charset = utf-8
 end_of_line = lf
+indent_size = 4
+indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
-charset = utf-8
 
-# Match rust/toml, set 4 space indentation
-[*.{rs,toml}]
-indent_style = space
-indent_size = 4
-
-# Match json/yaml/markdown, set 2 space indentation
 [*.{json,yml,md}]
-indent_style = space
 indent_size = 2
+
+[*.sh]
+indent_size = 2
+binary_next_line = true
+switch_case_indent = true
