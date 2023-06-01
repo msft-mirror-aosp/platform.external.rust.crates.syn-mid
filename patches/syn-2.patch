@@ -1,0 +1,50 @@
+diff --git a/src/func.rs b/src/func.rs
+index a53e63b..384e80b 100644
+--- a/src/func.rs
++++ b/src/func.rs
+@@ -85,11 +85,12 @@ mod parsing {
+ 
+     impl Parse for Signature {
+         fn parse(input: ParseStream<'_>) -> Result<Self> {
++            #[allow(clippy::trivially_copy_pass_by_ref)]
+             fn get_variadic(input: &&FnArg) -> Option<Variadic> {
+                 if let FnArg::Typed(PatType { ty, .. }) = input {
+                     if let Type::Verbatim(tokens) = &**ty {
+                         if let Ok(dots) = parse2(tokens.clone()) {
+-                            return Some(Variadic { attrs: Vec::new(), dots });
++                            return Some(Variadic { attrs: Vec::new(), pat: None, comma: None, dots });
+                         }
+                     }
+                 }
+@@ -106,7 +107,7 @@ mod parsing {
+ 
+             let content;
+             let paren_token = parenthesized!(content in input);
+-            let inputs = content.parse_terminated(FnArg::parse)?;
++            let inputs = content.parse_terminated(FnArg::parse, Token![,])?;
+             let variadic = inputs.last().as_ref().and_then(get_variadic);
+ 
+             let output: ReturnType = input.parse()?;
+@@ -119,11 +120,11 @@ mod parsing {
+                 abi,
+                 fn_token,
+                 ident,
++                generics,
+                 paren_token,
+                 inputs,
+-                output,
+                 variadic,
+-                generics,
++                output,
+             })
+         }
+     }
+@@ -210,7 +211,7 @@ mod printing {
+             FnArg::Receiver(_) => return false,
+         };
+ 
+-        let tokens = match pat.ty.as_ref() {
++        let tokens = match &*pat.ty {
+             Type::Verbatim(tokens) => tokens,
+             _ => return false,
+         };
