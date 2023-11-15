@@ -41,15 +41,13 @@ rust_library_host {
     name: "libsyn_mid",
     crate_name: "syn_mid",
     cargo_env_compat: true,
-    cargo_pkg_version: "0.5.3",
+    cargo_pkg_version: "0.6.0",
     srcs: ["src/lib.rs"],
-    edition: "2018",
+    edition: "2021",
     rustlibs: [
         "libproc_macro2",
         "libquote",
         "libsyn",
     ],
     compile_multilib: "first",
-    product_available: true,
-    vendor_available: true,
 }
