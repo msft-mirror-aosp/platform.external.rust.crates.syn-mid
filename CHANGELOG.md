@@ -10,6 +10,16 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [0.6.0] - 2023-09-30
+
+- Update to syn 2.0. ([#26](https://github.com/taiki-e/syn-mid/pull/26))
+
+## [0.5.4] - 2023-06-29
+
+- Increase the minimum supported Rust version from Rust 1.31 to Rust 1.56.
+
+- Update minimal version of `proc-macro2` to 1.0.60.
+
 ## [0.5.3] - 2021-01-05
 
 - Exclude unneeded files from crates.io.
@@ -28,9 +38,7 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [0.5.0] - 2019-12-09
 
-- [Added `Signature` type.][13]
-
-[13]: https://github.com/taiki-e/syn-mid/pull/13
+- Added `Signature` type. ([#13](https://github.com/taiki-e/syn-mid/pull/13))
 
 ## [0.4.0] - 2019-08-15
 
@@ -62,11 +70,13 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [0.1.0] - 2019-02-14
 
-**Note: This release has been yanked.**
+**Note:** This release has been yanked.
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/syn-mid/compare/v0.5.3...HEAD
+[Unreleased]: https://github.com/taiki-e/syn-mid/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/taiki-e/syn-mid/compare/v0.5.4...v0.6.0
+[0.5.4]: https://github.com/taiki-e/syn-mid/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/taiki-e/syn-mid/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/taiki-e/syn-mid/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/taiki-e/syn-mid/compare/v0.5.0...v0.5.1
