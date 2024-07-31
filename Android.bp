@@ -41,6 +41,7 @@ license {
 
 rust_library_host {
     name: "libsyn_mid",
+    host_cross_supported: false,
     crate_name: "syn_mid",
     cargo_env_compat: true,
     cargo_pkg_version: "0.6.0",
